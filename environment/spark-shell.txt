@@ -1,0 +1,1 @@
+run --rm --name sparkshell -it --network environment_default -p 4040:4040 -v `pwd`/data/small:/data capacman/spark-shell:3.2.1 spark-shell --master spark://spark-master:7077

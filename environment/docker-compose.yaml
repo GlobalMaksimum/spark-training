@@ -1,0 +1,25 @@
+version: "3"
+services:
+  spark-master:
+    image: capacman/spark-master:3.2.1
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+    volumes:
+      - ./data/small:/data
+      - ./app:/app
+    environment:
+      - "SPARK_LOCAL_IP=spark-master"
+  spark-worker:
+    image: capacman/spark-worker:3.2.1
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=4G
+      - SPARK_DRIVER_MEMORY=512m
+      - SPARK_EXECUTOR_MEMORY=512m
+    volumes:
+      - ./data/small:/data
+      - ./app:/app
