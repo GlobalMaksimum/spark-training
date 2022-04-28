@@ -6,5 +6,6 @@ lazy val root = (project in file("."))
   .settings(
     name := "spark-egitim",
     fork := true,
-    libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.2.1"
+    libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.2.1" % "provided",
+    //libraryDependencies += mydeb
   )

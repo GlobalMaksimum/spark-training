@@ -31,7 +31,7 @@ object ParsingUtils extends Serializable{
       title
         .substring(title.lastIndexOf("("), title.lastIndexOf(")"))
         .drop(1)
-        .toInt
+        .toLong
     ).toOption
     val genres = remaining.substring(sp + 1).split('|').toList
     Movie(id, title, year, genres)

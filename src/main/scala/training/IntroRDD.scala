@@ -74,11 +74,11 @@ object IntroRDD {
 
     val keyedMovies = movies.keyBy(_.id)
 
-    val joined: RDD[(Int, (Movie, Rating))] = keyedMovies.join(keyedRatings)
+    //val joined: RDD[(Int, (Movie, Rating))] = keyedMovies.join(keyedRatings)
 
-    joined.take(10).foreach(println)
+    //joined.take(10).foreach(println)
 
-    val cogrouped: RDD[(Int, (Iterable[Movie], Iterable[Rating]))] = keyedMovies.cogroup(keyedRatings)
+    //val cogrouped: RDD[(Int, (Iterable[Movie], Iterable[Rating]))] = keyedMovies.cogroup(keyedRatings)
 
     // partition preserving
 

@@ -3,9 +3,9 @@ package training
 import java.sql.Timestamp
 
 case class Movie(
-                  id: Int,
+                  id: Long,
                   title: String,
-                  year: Option[Int],
+                  year: Option[Long],
                   genres: List[String]
                 )
 case class Rating(userId: Int, movieId: Int, rating: Double, ts: Timestamp)

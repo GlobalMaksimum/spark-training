@@ -23,3 +23,17 @@ services:
     volumes:
       - ./data/small:/data
       - ./app:/app
+  postgres:
+    image: postgres:11-bullseye
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    environment:
+      - "POSTGRES_PASSWORD=metastore"
+      - "POSTGRES_USER=metastore"
+  metastore:
+    image: capacman/hive:2.3.9
+    depends_on:
+      - postgres
+    volumes:
+      - ./data/small:/data
+      - ./app:/app
