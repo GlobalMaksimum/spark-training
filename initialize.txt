@@ -1,0 +1,71 @@
+import java.sql.Timestamp
+import scala.util.Try
+import org.apache.spark.sql.types._
+import org.apache.spark.sql.functions._
+import spark.implicits._
+
+case class Movie(
+                  id: Long,
+                  title: String,
+                  year: Option[Long],
+                  genres: List[String]
+                )
+case class Rating(userId: Int, movieId: Long, rating: Double, ts: Timestamp)
+
+case class Link(movieId:Long,imdbId:Long,tmdbId:Option[Long])
+
+case class Tag(userId:Int,movieId:Long,tag:String,ts:Timestamp)
+
+object ParsingUtils extends Serializable{
+
+  def parseRating(line: String): Rating = line.split(',').toList match {
+    case userId :: movieId :: rating :: ts :: Nil =>
+      Rating(
+        userId.toInt,
+        movieId.toInt,
+        rating.toDouble,
+        new Timestamp(ts.toLong * 1000)
+      )
+  }
+
+  def parseMovie(line: String): Movie = {
+    val splitted = line.split(",", 2)
+
+    val id = splitted(0).toInt
+    val remaining = splitted(1)
+    val sp = remaining.lastIndexOf(",")
+    val titleDirty = remaining.substring(0, sp)
+    val title =
+      if (titleDirty.startsWith("\"")) titleDirty.drop(1).init else titleDirty   // Filmin Adi
+
+    val year = Try(
+      title
+        .substring(title.lastIndexOf("("), title.lastIndexOf(")"))
+        .drop(1)
+        .toLong
+    ).toOption
+    val genres = remaining.substring(sp + 1).split('|').toList
+    Movie(id, title, year, genres)
+  }
+
+  def parseLink(line:String):Link = line.split(',').toList match {
+    case movieId::imdbId::tmdbId::Nil => Link(movieId.toInt, imdbId.toInt, Some(tmdbId.toInt))
+    case movieId::imdbId::Nil => Link(movieId.toInt, imdbId.toInt, None)
+  }
+
+  def parseTag(line:String):Tag = line.split(',').toList match {
+    case userId::movieId::tag::ts::Nil => Tag(userId.toInt,movieId.toInt,tag,new Timestamp(ts.toLong * 1000))
+  }
+}
+
+val tagsSchema = StructType(Array(StructField("movieId",LongType,true), StructField("tag",StringType,true), StructField("ts",TimestampType,true), StructField("userId",IntegerType,true)))
+val tags = spark.read.format("json").schema(tagsSchema).load("/data/tags.json")
+val movies =  spark.read.format("json").load("/data/movies.json")
+val ratingsSchema = StructType(Array(StructField("userId",IntegerType,true), StructField("movieId",LongType,true), StructField("ts",TimestampType,true),StructField("rating",DoubleType,true)))
+val ratings =  spark.read.format("json").schema(ratingsSchema).load("/data/ratings.json")
+val links = spark.read.format("json").load("/data/links.json")
+
+val moviesDS = movies.as[Movie]
+val tagsDS = tags.as[Tag]
+val linkDS = links.as[Link]
+val ratingDS = ratings.as[Rating]
